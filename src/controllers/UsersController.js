@@ -2,7 +2,7 @@ const UserService = require("../services/UserService")
 const hs = require("http-status")
 const uuid = require("uuid")
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper")
-const ApiError = require("../error/ApiError");
+const ApiError = require("../scripts/utils/error");
 const eventEmitter = require("../scripts/events/eventEmitter")
 const Response = require("../scripts/utils/response");
 
@@ -18,7 +18,13 @@ class UserController {
                 next(new ApiError(e?.message))
             })
     }
-    create(req, res, next) {
+    async create(req, res, next) {
+        const { email } = req.body
+        const userCheck = await UserService.findOne({ email })
+        if (userCheck) {
+            throw new ApiError("Girmiş Olduğunuz Email Kullanımda !", 401)
+        }
+        next()
         req.body.password = passwordToHash(req.body.password)
 
         UserService.insert(req.body).then(create => {
@@ -50,7 +56,7 @@ class UserController {
 
 
             } catch (e) {
-                res.status(hs.BAD_REQUEST).send({ msg: e })
+                throw new ApiError("Üyelik işlemi sırasında bir hata oluştu !", 401)
 
             }
 
@@ -60,7 +66,7 @@ class UserController {
 
         })
             .catch(e => {
-                res.status(hs.BAD_REQUEST).send({ msg: e })
+                throw new ApiError("Bir hata oluştu !", 401)
             })
     }
     login(req, res) {
@@ -78,13 +84,11 @@ class UserController {
                 }
                 console.log(user)
                 delete user.password
-                res.status(hs.OK).send({
-                    code: 0,
-                    msg: "Giriş işlemi başarılı",
-                    user
-                })
+                return new Response(user, "Giriş işlemi Başarılı.").success(res)
             })
-            .catch((e) => next(new ApiError(e?.message)))
+            .catch((e) => {
+                throw new ApiError("Bir hata oluştu - Giriş işlemi başarısız !", 401)
+            })
 
     }
     resetPassword(req, res) {
@@ -104,14 +108,10 @@ class UserController {
             },
             )
 
-            res.status(hs.OK).send({
-                code: 0,
-                msg: "E-posta başarı ile gönderildi.",
-                updatedUser
-            })
+            return new Response(updatedUser, "Şifre sıfırlama işlemi başarılı.").success(res)
         })
             .catch(() => {
-                next(new ApiError(e?.message))
+                return new Response("Şifre sıfırlama işlemi başarısız.").error400(res)
             })
 
     }
@@ -120,15 +120,11 @@ class UserController {
             return res.status(hs.BAD_REQUEST).send({ msg: "ID bilgisi eksik" })
         }
         UserService.update(req.params.id, req.body).then((updatedUser) => {
-            res.status(hs.OK).send({
-                code: 0,
-                msg: "Güncelleme işlemi başarılı.",
-                updatedUser
-            })
-            console.log("user güncellendi")
+            return new Response(updatedUser, "Güncelleme işlemi başarılı.").success(res)
+
         })
             .catch(() => {
-                next(new ApiError(e?.message))
+                return new Response("Güncelleme işlemi başarısız.").error400(res)
             })
     }
 
@@ -142,31 +138,13 @@ class UserController {
                 if (!deletedUser) {
                     return res.status(hs.NOT_FOUND).send({ message: "Böyle bir kullanıcı bulunmamaktadır." })
                 }
-                res.status(hs.OK).send({
-                    code: 0,
-                    msg: "Silme işlemi başarılı.",
-                    deletedUser
-                });
+                return new Response(deletedUser, "Kullanıcı işlemi başarılı.").success(res)
             })
             .catch((e) => {
-                next(new ApiError(e?.message))
+                return new Response("Kullanıcı silme işlemi başarısız.").error400(res)
             })
 
     }
-    changePassword(req, res) {
-        req.body.password = passwordToHash(req.body.password)
-        UserService.updateDoc({ _id: req.user?._doc?._id }, req.body)
-            .then((update) => {
-                console.log(req.user._doc._id)
-                res.status(hs.OK).send({
-                    code: 0,
-                    msg: "Şifre değiştirme başarılı",
-                    update
-                })
-            })
-            .catch((e) => next(new ApiError(e?.message)))
-    }
-
 
 }
 

@@ -6,11 +6,11 @@ const authenticate = require("../middlewares/authenticate");
 
 
 router.post("/register", authValidation.register, UserController.create);
-//router.route("/login").post(validate(schemas.loginValidation, "body"), UserController.login);
-//router.route("/reset-password").post(validate(schemas.resetPasswordValidation), UserController.resetPassword);
-//router.route("/:id").delete(UserController.deleteUser)
-//router.route("/:id").patch(authenticate, validate(schemas.updateUser, "body"), UserController.updatedUser);
-//router.route("/change-password").post(authenticate, validate(schemas.changePassword), UserController.changePassword)
+router.post("/login", authValidation.login, UserController.login);
+router.post("/reset-password", authValidation.ResetPassword, UserController.resetPassword);
+router.delete("/delete/:id", UserController.deleteUser)
+router.patch("/update/:id", authenticate, authValidation.UpdateUser, UserController.updatedUser);
+
 
 
 
