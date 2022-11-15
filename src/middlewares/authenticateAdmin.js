@@ -1,6 +1,6 @@
 const JWT = require("jsonwebtoken");
 const hs = require("http-status");
-const ApiError = require("../errors/ApiError");
+const ApiError = require("../scripts/utils/error");
 
 
 const authenticateToken = (req, res, next) => {
@@ -11,12 +11,10 @@ const authenticateToken = (req, res, next) => {
     JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY, (err, user) => {
 
         if (!user?._doc?.isAdmin) {
-            next(new ApiError("Bu işlemi yapabilmeniz için admin olmanı gerek"));
-            return
+            throw new ApiError("Bu işlemi yapabilmeniz için admin olmanı gerekiyor !", 401, 109)
         }
         if (err) {
-            next(new ApiError("Sorun oluştu"));
-            return
+            throw new ApiError("Bir hata oluştu !", 401, 103)
         }
         req.user = user?._doc;
         next();

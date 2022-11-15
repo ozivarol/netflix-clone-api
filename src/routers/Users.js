@@ -1,7 +1,6 @@
 const router = require("express").Router()
 const UserController = require("../controllers/UsersController")
 const AuthValidation = require("../validations/Users")
-const validate = require("../middlewares/validate")
 const authenticate = require("../middlewares/authenticate");
 
 router.get("/list", UserController.index)
