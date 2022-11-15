@@ -1,8 +1,8 @@
 const joi = require("joi")
-const APIError = require("../scripts/utils/error")
+const ApiError = require("../scripts/utils/error")
 
-class authValidation {
-    constructor() { }
+class AuthValidation {
+    constructor() { /* TODO document why this constructor is empty */ }
     static register = async (req, res, next) => {
         try {
 
@@ -40,8 +40,8 @@ class authValidation {
             }).validateAsync(req.body)
         } catch (error) {
             if (error.details && error?.details[0].message)
-                throw new APIError(error.details[0].message, 400)
-            else throw new APIError("Lütfen Validasyon Kullarına Uyun", 400)
+                throw new ApiError(error.details[0].message, 400)
+            else throw new ApiError("Lütfen Validasyon Kullarına Uyun", 400)
         }
         next()
     }
@@ -67,8 +67,8 @@ class authValidation {
             }).validateAsync(req.body)
         } catch (error) {
             if (error.details && error?.details[0].message)
-                throw new APIError(error.details[0].message, 400)
-            else throw new APIError("Lütfen Validasyon Kullarına Uyun", 400)
+                throw new ApiError(error.details[0].message, 400)
+            else throw new ApiError("Lütfen Validasyon Kullarına Uyun", 400)
         }
         next();
     }
@@ -87,8 +87,8 @@ class authValidation {
             }).validateAsync(req.body)
         } catch (error) {
             if (error.details && error?.details[0].message)
-                throw new APIError(error.details[0].message, 400)
-            else throw new APIError("Lütfen Validasyon Kullarına Uyun", 400)
+                throw new ApiError(error.details[0].message, 400)
+            else throw new ApiError("Lütfen Validasyon Kullarına Uyun", 400)
         }
         next();
     }
@@ -129,11 +129,11 @@ class authValidation {
             }).validateAsync(req.body)
         } catch (error) {
             if (error.details && error?.details[0].message)
-                throw new APIError(error.details[0].message, 400)
-            else throw new APIError("Lütfen Validasyon Kullarına Uyun", 400)
+                throw new ApiError(error.details[0].message, 400)
+            else throw new ApiError("Lütfen Validasyon Kullarına Uyun", 400)
         }
         next()
     }
 }
 
-module.exports = authValidation
+module.exports = AuthValidation

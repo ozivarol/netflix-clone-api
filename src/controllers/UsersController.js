@@ -15,14 +15,14 @@ class UserController {
 
         })
             .catch(e => {
-                next(new ApiError(e?.message))
+                throw new ApiError("İşlem başarısız!", 401, 99)
             })
     }
     async create(req, res, next) {
         const { email } = req.body
         const userCheck = await UserService.findOne({ email })
         if (userCheck) {
-            throw new ApiError("Girmiş Olduğunuz Email Kullanımda !", 401)
+            throw new ApiError("Girmiş Olduğunuz Email Kullanımda !", 401, 100)
         }
         next()
         req.body.password = passwordToHash(req.body.password)
@@ -56,7 +56,7 @@ class UserController {
 
 
             } catch (e) {
-                throw new ApiError("Üyelik işlemi sırasında bir hata oluştu !", 401)
+                throw new ApiError("Üyelik işlemi sırasında bir hata oluştu !", 401, 102)
 
             }
 
@@ -66,7 +66,7 @@ class UserController {
 
         })
             .catch(e => {
-                throw new ApiError("Bir hata oluştu !", 401)
+                throw new ApiError("Bir hata oluştu !", 401, 103)
             })
     }
     login(req, res) {
@@ -87,7 +87,7 @@ class UserController {
                 return new Response(user, "Giriş işlemi Başarılı.").success(res)
             })
             .catch((e) => {
-                throw new ApiError("Bir hata oluştu - Giriş işlemi başarısız !", 401)
+                throw new ApiError("Bir hata oluştu - Giriş işlemi başarısız !", 401, 104)
             })
 
     }
@@ -111,7 +111,7 @@ class UserController {
             return new Response(updatedUser, "Şifre sıfırlama işlemi başarılı.").success(res)
         })
             .catch(() => {
-                return new Response("Şifre sıfırlama işlemi başarısız.").error400(res)
+                throw new ApiError("Şifre sıfırlama işlemi başarısız !", 400, 104)
             })
 
     }
@@ -124,13 +124,13 @@ class UserController {
 
         })
             .catch(() => {
-                return new Response("Güncelleme işlemi başarısız.").error400(res)
+                throw new ApiError("Güncelleme işlemi başarısız !", 400, 105)
             })
     }
 
     deleteUser(req, res) {
         if (!req.params?.id) {
-            return res.status(hs.BAD_REQUEST).send({ message: "ID bilgisi eksik" });
+            throw new ApiError("Girmiş Olduğunuz id parametresi bulunamadı !", 401, 108)
         }
         UserService.remove(req.params?.id)
             .then((deletedUser) => {
@@ -141,7 +141,7 @@ class UserController {
                 return new Response(deletedUser, "Kullanıcı işlemi başarılı.").success(res)
             })
             .catch((e) => {
-                return new Response("Kullanıcı silme işlemi başarısız.").error400(res)
+                throw new ApiError("Kullanıcı silme işlemi başarısız !", 401, 106)
             })
 
     }

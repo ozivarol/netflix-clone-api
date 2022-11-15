@@ -5,7 +5,12 @@ const errorHandlerMiddleware = (err, req, res, next) => {
         return res.status(err.statusCode || 400)
             .json({
                 success: false,
-                message: err.message
+                message: err.message,
+                errorCode: err.errorCode
+
+
+
+
             })
     }
     return res.status(500).json({

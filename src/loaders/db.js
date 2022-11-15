@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-
+const ApiError = require("../scripts/utils/error");
 const db = mongoose.connection
 
 
@@ -19,8 +19,7 @@ const connectDB = async () => {
     }
 
     ).catch(err => {
-        console.log(err)
-        process.exit(1)
+        throw new ApiError("Database bağlantı hatası !", 500, 101)
     })
 
 

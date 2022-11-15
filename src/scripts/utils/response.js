@@ -20,17 +20,20 @@ class Response {
         })
     }
 
-    error500(res) {
+    error500(err, req, res, next) {
         return res.status(500).json({
             success: false,
+            errorCode: 100,
             data: this.data,
-            message: this.message ?? "İşlem Başarısız !"
+            message: this.message ?? "İşlem Başarısız Server Hatası !"
         })
+
     }
 
     error400(res) {
         return res.status(400).json({
             success: false,
+            errorCode: 200,
             data: this.data,
             message: this.message ?? "İşlem Başarısız !"
         })
@@ -39,6 +42,7 @@ class Response {
     error401(res) {
         return res.status(401).json({
             success: false,
+            errorCode: 300,
             data: this.data,
             message: this.message ?? "Lütfen Oturum Açın !"
         })
@@ -47,14 +51,16 @@ class Response {
     error404(res) {
         return res.status(404).json({
             success: false,
+            errorCode: 400,
             data: this.data,
-            message: this.message ?? "İşlem Başarısız !"
+            message: this.message ?? "Kullanıcı Bulunamadı !"
         })
     }
 
     error429(res) {
         return res.status(429).json({
             success: false,
+            errorCode: 500,
             data: this.data,
             message: this.message ?? "Çok Fazla İstek Atıldı !"
         })

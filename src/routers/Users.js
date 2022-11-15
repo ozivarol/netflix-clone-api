@@ -1,15 +1,15 @@
 const router = require("express").Router()
 const UserController = require("../controllers/UsersController")
-const authValidation = require("../validations/Users")
+const AuthValidation = require("../validations/Users")
 const validate = require("../middlewares/validate")
 const authenticate = require("../middlewares/authenticate");
 
-
-router.post("/register", authValidation.register, UserController.create);
-router.post("/login", authValidation.login, UserController.login);
-router.post("/reset-password", authValidation.ResetPassword, UserController.resetPassword);
+router.get("/list", UserController.index)
+router.post("/register", AuthValidation.register, UserController.create);
+router.post("/login", AuthValidation.login, UserController.login);
+router.post("/reset-password", AuthValidation.ResetPassword, UserController.resetPassword);
 router.delete("/delete/:id", UserController.deleteUser)
-router.patch("/update/:id", authenticate, authValidation.UpdateUser, UserController.updatedUser);
+router.patch("/update/:id", authenticate, AuthValidation.UpdateUser, UserController.updatedUser);
 
 
 

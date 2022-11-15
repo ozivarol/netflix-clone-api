@@ -1,7 +1,9 @@
 class APIError extends Error {
-    constructor(message, statusCode) {
+    constructor(message, statusCode, errorCode) {
         super(message)
         this.statusCode = statusCode || 400
+        this.errorCode = errorCode
+
     }
 }
 
