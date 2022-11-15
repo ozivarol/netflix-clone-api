@@ -1,17 +1,17 @@
 const hs = require("http-status");
 const JWT = require("jsonwebtoken");
-
+const ApiError = require("../scripts/utils/error")
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers["authorization"];
+
 
     const token = req.headers?.token;
 
     if (!token) {
-        return res.status(hs.UNAUTHORIZED).send({ error: "Bu işlemi yapmak için giriş yapmalısınız.." });
+        throw new ApiError("Bu işlemi yapabilmek için giriş yapmalısınız !", 401, 110)
     }
     JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY, (err, user) => {
         if (err) {
-            return res.status(hs.FORBIDDEN).send({ err: err });
+            throw new ApiError("Token hatası !", 400, 111)
         }
         req.user = user;
         next();

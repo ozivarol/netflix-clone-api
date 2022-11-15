@@ -24,7 +24,7 @@ class UserController {
         if (userCheck) {
             throw new ApiError("Girmiş Olduğunuz Email Kullanımda !", 401, 100)
         }
-        next()
+
         req.body.password = passwordToHash(req.body.password)
 
         UserService.insert(req.body).then(create => {
@@ -56,7 +56,8 @@ class UserController {
 
 
             } catch (e) {
-                throw new ApiError("Üyelik işlemi sırasında bir hata oluştu !", 401, 102)
+
+                return new Response(e, "Üyelik işlemi sırasında bir hata oluştu !").error500(res)
 
             }
 
@@ -66,6 +67,7 @@ class UserController {
 
         })
             .catch(e => {
+                console.log(e)
                 throw new ApiError("Bir hata oluştu !", 401, 103)
             })
     }
@@ -73,7 +75,7 @@ class UserController {
         req.body.password = passwordToHash(req.body.password)
         UserService.findOne(req.body)
             .then((user) => {
-                if (!user) { return res.status(hs.NOT_FOUND).send({ message: "BÖYLE BİR KULLANICI YOK" }) }
+                if (!user) { throw new ApiError("Bir hata oluştu !", 401, 103) }
 
                 user = {
                     ...user.toObject(),
@@ -87,7 +89,7 @@ class UserController {
                 return new Response(user, "Giriş işlemi Başarılı.").success(res)
             })
             .catch((e) => {
-                throw new ApiError("Bir hata oluştu - Giriş işlemi başarısız !", 401, 104)
+                return new Response(e, "Giriş işlemi başarısız").error401(res)
             })
 
     }
@@ -95,7 +97,7 @@ class UserController {
         const new_password = uuid.v4()?.split("-")[0] || `ntflx-${new Date().getTime()}`
         UserService.update({ email: req.body.email }, { password: passwordToHash(new_password) }).then((updatedUser) => {
             if (!updatedUser) {
-                return next(new ApiError(e?.message))
+                return new Response(req.body.email, "Böyle bir kullanıcı bulunamadı").error404(res)
 
             }
 

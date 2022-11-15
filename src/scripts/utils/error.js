@@ -1,3 +1,4 @@
+
 class APIError extends Error {
     constructor(message, statusCode, errorCode) {
         super(message)
@@ -5,6 +6,9 @@ class APIError extends Error {
         this.errorCode = errorCode
 
     }
+
+
 }
+
 
 module.exports = APIError

@@ -1,4 +1,4 @@
-const ApiError = require("../error/ApiError");
+const ApiError = require("../scripts/utils/error");
 const hs = require("http-status");
 
 const idChecker = (req, res, next) => {

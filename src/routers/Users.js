@@ -3,7 +3,7 @@ const UserController = require("../controllers/UsersController")
 const AuthValidation = require("../validations/Users")
 const authenticate = require("../middlewares/authenticate");
 
-router.get("/list", UserController.index)
+router.get("/list", authenticate, UserController.index)
 router.post("/register", AuthValidation.register, UserController.create);
 router.post("/login", AuthValidation.login, UserController.login);
 router.post("/reset-password", AuthValidation.ResetPassword, UserController.resetPassword);
