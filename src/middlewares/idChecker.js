@@ -6,7 +6,6 @@ const idChecker = (req, res, next) => {
     if (!req?.params?.id?.match(/^[0-9a-fA-F]{24}$/)) {
         throw new ApiError("Girmiş Olduğunuz id parametresi yanlış !", 401, 107)
     };
-    next();
 
 
 }

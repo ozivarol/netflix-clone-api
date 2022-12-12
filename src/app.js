@@ -7,10 +7,12 @@ const cors = require("cors");
 const { UserRoutes } = require("./routers");
 const errorHandlerMiddleware = require("./middlewares/errorHandling")
 const event = require("./scripts/events")
+const { connect_rabbitmq } = require("./scripts/utils/rabbimqConnection")
 
 config();
 loaders();
 event();
+connect_rabbitmq()
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extends: true }))

@@ -5,7 +5,7 @@ const { passwordToHash, generateAccessToken, generateRefreshToken } = require(".
 const ApiError = require("../scripts/utils/error");
 const eventEmitter = require("../scripts/events/eventEmitter")
 const Response = require("../scripts/utils/response");
-
+const { connect_rabbitmq, add_queue } = require("../scripts/utils/rabbimqConnection")
 
 class UserController {
     index(req, res) {
@@ -15,19 +15,21 @@ class UserController {
 
         })
             .catch(e => {
-                throw new ApiError("İşlem başarısız!", 401, 99)
+                throw new ApiError("İşlem başarısız!", 401, 99, "index")
             })
     }
     async create(req, res, next) {
         const { email } = req.body
         const userCheck = await UserService.findOne({ email })
         if (userCheck) {
-            throw new ApiError("Girmiş Olduğunuz Email Kullanımda !", 401, 100)
+            throw new ApiError("Girmiş Olduğunuz Email Kullanımda !", 401, 100, "create")
         }
 
         req.body.password = passwordToHash(req.body.password)
 
         UserService.insert(req.body).then(create => {
+            connect_rabbitmq(create.email)
+            add_queue(create.email)
 
             try {
                 eventEmitter.emit("send_create_email", {
@@ -57,25 +59,36 @@ class UserController {
 
             } catch (e) {
 
-                return new Response(e, "Üyelik işlemi sırasında bir hata oluştu !").error500(res)
+                return new Response(e, "Üyelik işlemi sırasında bir hata oluştu !", "create").error500(res)
 
             }
 
 
-            return new Response(create, "Kayıt Başarıyla Eklendi").created(res)
+            return new Response(create, "Kayıt Başarıyla Eklendi", "create").created(res)
 
 
         })
             .catch(e => {
                 console.log(e)
-                throw new ApiError("Bir hata oluştu !", 401, 103)
+                throw new ApiError("Bir hata oluştu !", 401, 103, "create")
             })
     }
-    login(req, res) {
+    async login(req, res) {
+        const { email } = req.body
+        const userControl = await UserService.findOne({ email })
+        console.log(req.body.email)
         req.body.password = passwordToHash(req.body.password)
-        UserService.findOne(req.body)
+        if (userControl === null) {
+            throw new ApiError(`${req.body.email}'e ait bir kullanıcı bulunamadı`, 401, 103, "login")
+
+        }
+        UserService.findOne(req.body.email)
             .then((user) => {
-                if (!user) { throw new ApiError("Bir hata oluştu !", 401, 103) }
+
+
+                if (!user) {
+                    throw new ApiError(`Bir hata oluştu ${user}`, 401, 103, "login")
+                }
 
                 user = {
                     ...user.toObject(),
@@ -86,10 +99,11 @@ class UserController {
                 }
                 console.log(user)
                 delete user.password
-                return new Response(user, "Giriş işlemi Başarılı.").success(res)
+                return new Response(user, "Giriş işlemi Başarılı.", "login").success(res)
             })
             .catch((e) => {
-                return new Response(e, "Giriş işlemi başarısız").error401(res)
+                console.log(userControl)
+                return new Response(e, "Giriş işlemi başarısız", "login").error401(res)
             })
 
     }
@@ -97,7 +111,7 @@ class UserController {
         const new_password = uuid.v4()?.split("-")[0] || `ntflx-${new Date().getTime()}`
         UserService.update({ email: req.body.email }, { password: passwordToHash(new_password) }).then((updatedUser) => {
             if (!updatedUser) {
-                return new Response(req.body.email, "Böyle bir kullanıcı bulunamadı").error404(res)
+                return new Response(req.body.email, "Böyle bir kullanıcı bulunamadı", "resetpassword").error404(res)
 
             }
 
@@ -110,10 +124,10 @@ class UserController {
             },
             )
 
-            return new Response(updatedUser, "Şifre sıfırlama işlemi başarılı.").success(res)
+            return new Response(updatedUser, "Şifre sıfırlama işlemi başarılı.", "resetpassword").success(res)
         })
             .catch(() => {
-                throw new ApiError("Şifre sıfırlama işlemi başarısız !", 400, 104)
+                throw new ApiError("Şifre sıfırlama işlemi başarısız !", 400, 104, "resetpassword")
             })
 
     }
@@ -122,28 +136,28 @@ class UserController {
             return res.status(hs.BAD_REQUEST).send({ msg: "ID bilgisi eksik" })
         }
         UserService.update(req.params.id, req.body).then((updatedUser) => {
-            return new Response(updatedUser, "Güncelleme işlemi başarılı.").success(res)
+            return new Response(updatedUser, "Güncelleme işlemi başarılı.", "updateUser").success(res)
 
         })
             .catch(() => {
-                throw new ApiError("Güncelleme işlemi başarısız !", 400, 105)
+                throw new ApiError("Güncelleme işlemi başarısız !", 400, 105, "updateUser")
             })
     }
 
     deleteUser(req, res) {
         if (!req.params?.id) {
-            throw new ApiError("Girmiş Olduğunuz id parametresi bulunamadı !", 401, 108)
+            throw new ApiError("Girmiş Olduğunuz id parametresi bulunamadı !", 401, 108, "deleteUser")
         }
         UserService.remove(req.params?.id)
             .then((deletedUser) => {
                 console.log(deletedUser)
                 if (!deletedUser) {
-                    return res.status(hs.NOT_FOUND).send({ message: "Böyle bir kullanıcı bulunmamaktadır." })
+                    return new Response("Böyle bir kullanıcı bulunamadı", "deleteUser").error404(res)
                 }
-                return new Response(deletedUser, "Kullanıcı işlemi başarılı.").success(res)
+                return new Response(deletedUser, "Kullanıcı silme işlemi başarılı.", "deleteUser").success(res)
             })
             .catch((e) => {
-                throw new ApiError("Kullanıcı silme işlemi başarısız !", 401, 106)
+                throw new ApiError("Kullanıcı silme işlemi başarısız !", 401, 106, "deleteUser")
             })
 
     }

@@ -6,7 +6,8 @@ const InfoSchema = new mongoose.Schema({
         data: Object,
         message: String,
         service: String
-    }
+    },
+    methodName: String
 
 }, {
     timestamps: true,

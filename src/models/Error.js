@@ -6,7 +6,8 @@ const ErrorSchema = new mongoose.Schema({
         errorCode: Number,
         message: String,
         success: Boolean
-    }
+    },
+    methodName: String
 
 }, {
     timestamps: true,

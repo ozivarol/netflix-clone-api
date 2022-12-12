@@ -8,7 +8,9 @@ const errorHandlerMiddleware = (err, req, res, next) => {
             message: {
                 success: false,
                 message: err.message,
-                errorCode: err.errorCode
+                statusCode: err.statusCode,
+                errorCode: err.errorCode,
+                methodName: err.methodName
             },
         });
         ErrorService.insert({
@@ -16,7 +18,9 @@ const errorHandlerMiddleware = (err, req, res, next) => {
             message: {
                 success: false,
                 message: err.message,
-                errorCode: err.errorCode
+                statusCode: err.statusCode,
+                errorCode: err.errorCode,
+                methodName: err.methodName
             },
         })
 
@@ -24,7 +28,10 @@ const errorHandlerMiddleware = (err, req, res, next) => {
             .json({
                 success: false,
                 message: err.message,
-                errorCode: err.errorCode
+                statusCode: err.statusCode,
+                errorCode: err.errorCode,
+                methodName: err.methodName
+
 
 
 
