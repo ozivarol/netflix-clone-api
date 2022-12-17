@@ -6,19 +6,36 @@ const ApiError = require("../scripts/utils/error");
 const eventEmitter = require("../scripts/events/eventEmitter")
 const Response = require("../scripts/utils/response");
 const { connect_rabbitmq, add_queue } = require("../scripts/utils/rabbimqConnection")
+const fs = require("fs")
 
 class UserController {
     index(req, res) {
-        UserService.list().then((response) => {
-            res.status(hs.OK).send(response)
-            console.log(response)
+        setTimeout(() => {
+            UserService.list().then((response) => {
+                console.log(req.timedout, "Api nedir")
 
-        })
-            .catch(e => {
-                throw new ApiError("İşlem başarısız!", 401, 99, "index")
+
+                res.status(hs.OK).send(response)
+                console.log(response)
+
+
+
+
             })
+                .catch(e => {
+                    if (req.timedout === true) {
+                        console.log(e)
+                        throw new ApiError("Timeout", 408, 999, "index")
+                    }
+                    throw new ApiError("İşlem başarısız!", 401, 99, "index")
+                })
+
+        }, 2000);
+
     }
     async create(req, res, next) {
+        console.log(req.body)
+
         const { email } = req.body
         const userCheck = await UserService.findOne({ email })
         if (userCheck) {
@@ -28,30 +45,19 @@ class UserController {
         req.body.password = passwordToHash(req.body.password)
 
         UserService.insert(req.body).then(create => {
-            connect_rabbitmq(create.email)
-            add_queue(create.email)
+            let template = fs.readFileSync(require.resolve("./email.html"), 'utf8').toString()
+
 
             try {
+                connect_rabbitmq(create.email)
+                add_queue(create.email)
                 eventEmitter.emit("send_create_email", {
 
                     to: create.email,
                     subject: "Üye Kayıdı Başarı ile tamamlandı ✔",
 
-                    html: `Merhaba ${create.name} Üyelik işleminiz başarı ile gerçekleştirilmiştir. <br /> Netflix'in taklidi değiliz sadece netflix daha iyiyiz 🥳🥳. <h1 class="red"> Netflix </h1>`,
-                    amp: `<!doctype html>
-                    <html ⚡4email>
-                      <head>
-                        <meta charset="utf-8">
-                        <style amp4email-boilerplate>body{visibility:hidden}</style>
-                        <script async src="https://cdn.ampproject.org/v0.js"></script>
-                        <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
-                      </head>
-                      <body>
-                        <p>Image: <amp-img src="https://cldup.com/P0b1bUmEet.png" width="16" height="16"/></p>
-                        <p>GIF (requires "amp-anim" script in header):<br/>
-                          <amp-anim src="https://cldup.com/D72zpdwI-i.gif" width="500" height="350"/></p>
-                      </body>
-                    </html>`
+                    html: template
+
 
                 },
                 )

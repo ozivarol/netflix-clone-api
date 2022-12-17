@@ -1,15 +1,6 @@
 const eventEmitter = require("./eventEmitter");
 const nodemailer = require("nodemailer");
-const amqp = require("amqplib")
-require('dotenv').config()
-async function connect_rabbitmq() {
-    const connection = await amqp.connect(process.env.RABBIT_CONNECTION)
-    const channel = await connection.createChannel()
-    await channel.assertQueue("emailQueue")
 
-
-
-}
 
 module.exports = async () => {
     try {
