@@ -7,7 +7,7 @@ const timeout = require('connect-timeout')
 
 router.get("/list", timeout('3.5s'), UserController.index)
 router.post("/register", timeout('4s'), AuthValidation.register, UserController.create)
-router.post("/login", timeout('4s'), AuthValidation.login, UserController.login);
+router.post("/login", AuthValidation.login, UserController.login);
 router.post("/reset-password", timeout('4s'), AuthValidation.ResetPassword, UserController.resetPassword);
 router.delete("/delete/:id", timeout('4s'), idChecker, UserController.deleteUser)
 router.patch("/update/:id", timeout('4s'), authenticate, AuthValidation.UpdateUser, UserController.updatedUser);

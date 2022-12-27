@@ -9,7 +9,7 @@ class BaseService {
         return new this.BaseModel(data).save();
     }
     findOne(where) {
-        return this.BaseModel.findOne(where);
+        return this.BaseModel.findOne(where || {});
     }
     updateDoc(data, updateData) {
         return this.BaseModel.findByIdAndUpdate(data, updateData, { new: true });

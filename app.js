@@ -58,4 +58,4 @@ app.get('/main', (req, res) => {
     res.json({
         message: "Hello, welcome to Netflix",
     });
-})
+})

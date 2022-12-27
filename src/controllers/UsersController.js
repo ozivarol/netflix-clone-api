@@ -6,12 +6,19 @@ const ApiError = require("../scripts/utils/error");
 const eventEmitter = require("../scripts/events/eventEmitter")
 const Response = require("../scripts/utils/response");
 const { connect_rabbitmq, add_queue } = require("../scripts/utils/rabbimqConnection")
-const fs = require("fs")
+const fs = require("fs");
+
+
+
+
+
 
 class UserController {
     index(req, res) {
         setTimeout(() => {
             UserService.list().then((response) => {
+
+
                 console.log(req.timedout, "Api nedir")
 
 
@@ -30,7 +37,7 @@ class UserController {
                     throw new ApiError("İşlem başarısız!", 401, 99, "index")
                 })
 
-        }, 2000);
+        }, 1000);
 
     }
     async create(req, res, next) {
@@ -42,10 +49,13 @@ class UserController {
             throw new ApiError("Girmiş Olduğunuz Email Kullanımda !", 401, 100, "create")
         }
 
+
+        let template = fs.readFileSync(require.resolve("./email.html"), 'utf8').toString()
+        template = template.replace('{{name}}', req.body.first_name).replace('{{email}}', req.body.email).replace('{{password}}', req.body.password)
         req.body.password = passwordToHash(req.body.password)
 
         UserService.insert(req.body).then(create => {
-            let template = fs.readFileSync(require.resolve("./email.html"), 'utf8').toString()
+
 
 
             try {
@@ -88,7 +98,7 @@ class UserController {
             throw new ApiError(`${req.body.email}'e ait bir kullanıcı bulunamadı`, 401, 103, "login")
 
         }
-        UserService.findOne(req.body.email)
+        UserService.findOne(req.body)
             .then((user) => {
 
 
@@ -105,11 +115,12 @@ class UserController {
                 }
                 console.log(user)
                 delete user.password
+
                 return new Response(user, "Giriş işlemi Başarılı.", "login").success(res)
             })
             .catch((e) => {
-                console.log(userControl)
-                return new Response(e, "Giriş işlemi başarısız", "login").error401(res)
+                console.log(e)
+                return new Response(e, "Giriş işlemi başarısız lütfen e-posta ve şifrenizi kontrol edin", "login").error401(res)
             })
 
     }
@@ -166,6 +177,45 @@ class UserController {
                 throw new ApiError("Kullanıcı silme işlemi başarısız !", 401, 106, "deleteUser")
             })
 
+    }
+    async googleAuthController(req, res, email) {
+        console.log(email)
+        try {
+            const client = await google.auth.getClient({
+                keyFile: {
+                    "web": {
+                        "client_id": process.env.GOOGLE_CLIENT_ID,
+                        "project_id": process.env.GOOGLE_PROJECT_ID,
+                        "auth_uri": process.env.GOOGLE_AUTH_URI,
+                        "token_uri": process.env.GOOGLE_TOKEN_URI,
+                        "auth_provider_x509_cert_url": process.env.GOOGLE_AUTH_PROVIDER,
+                        "client_secret": process.env.GOOGLE_CLIENT_SECRET
+                    }
+                },
+                scopes: ['https://www.googleapis.com/auth/gmail.readonly']
+            });
+            const people = google.people({ version: 'v1', auth: client });
+            const response = await people.people.get({
+                resourceName: 'people/me',
+                personFields: 'emailAddresses',
+                auth: client
+            });
+
+            if (response.data.emailAddresses) {
+                const emailAddresses = response.data.emailAddresses;
+                for (const emailAddress of emailAddresses) {
+                    if (emailAddress.value === email) {
+                        response.send(`${email} has a Gmail account`);
+                        return;
+                    }
+                }
+                res.send(`${email} does not have a Gmail account`);
+            } else {
+                res.send(`${email} does not have a Gmail account`);
+            }
+        } catch (error) {
+            res.status(500).send({ error: error.message });
+        }
     }
 
 }
