@@ -178,45 +178,6 @@ class UserController {
             })
 
     }
-    async googleAuthController(req, res, email) {
-        console.log(email)
-        try {
-            const client = await google.auth.getClient({
-                keyFile: {
-                    "web": {
-                        "client_id": process.env.GOOGLE_CLIENT_ID,
-                        "project_id": process.env.GOOGLE_PROJECT_ID,
-                        "auth_uri": process.env.GOOGLE_AUTH_URI,
-                        "token_uri": process.env.GOOGLE_TOKEN_URI,
-                        "auth_provider_x509_cert_url": process.env.GOOGLE_AUTH_PROVIDER,
-                        "client_secret": process.env.GOOGLE_CLIENT_SECRET
-                    }
-                },
-                scopes: ['https://www.googleapis.com/auth/gmail.readonly']
-            });
-            const people = google.people({ version: 'v1', auth: client });
-            const response = await people.people.get({
-                resourceName: 'people/me',
-                personFields: 'emailAddresses',
-                auth: client
-            });
-
-            if (response.data.emailAddresses) {
-                const emailAddresses = response.data.emailAddresses;
-                for (const emailAddress of emailAddresses) {
-                    if (emailAddress.value === email) {
-                        response.send(`${email} has a Gmail account`);
-                        return;
-                    }
-                }
-                res.send(`${email} does not have a Gmail account`);
-            } else {
-                res.send(`${email} does not have a Gmail account`);
-            }
-        } catch (error) {
-            res.status(500).send({ error: error.message });
-        }
-    }
 
 }
 
