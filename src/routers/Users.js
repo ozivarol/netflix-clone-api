@@ -11,7 +11,7 @@ router.post("/login", AuthValidation.login, UserController.login);
 router.post("/reset-password", timeout('4s'), AuthValidation.ResetPassword, UserController.resetPassword);
 router.delete("/delete/:id", timeout('4s'), idChecker, UserController.deleteUser)
 router.patch("/update/:id", timeout('4s'), authenticate, AuthValidation.UpdateUser, UserController.updatedUser);
-
+router.get("/profile/:email", UserController.profile)
 
 
 

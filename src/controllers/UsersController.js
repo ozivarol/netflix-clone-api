@@ -178,6 +178,25 @@ class UserController {
             })
 
     }
+    profile(req, res, next) {
+        console.log(req.params.email)
+        if (!req.params.email) {
+            return next(new ApiError(e?.message))
+        }
+
+        UserService.findOne({ email: req.params.email })
+            .then((user) => {
+                console.log(user)
+                res.status(hs.OK).send({
+                    code: 200,
+                    msg: "Profil Bilgileri",
+                    user
+                })
+            })
+            .catch(e => {
+                next(new ApiError(e?.message))
+            })
+    }
 
 }
 
