@@ -7,7 +7,9 @@ const eventEmitter = require("../scripts/events/eventEmitter")
 const Response = require("../scripts/utils/response");
 const { connect_rabbitmq, add_queue } = require("../scripts/utils/rabbimqConnection")
 const fs = require("fs");
-
+var https = require('https');
+const request = require('request');
+const fetch = require('cross-fetch');
 
 
 
@@ -178,24 +180,37 @@ class UserController {
             })
 
     }
-    profile(req, res, next) {
+    async profile(req, res, next) {
         console.log(req.params.email)
         if (!req.params.email) {
             return next(new ApiError(e?.message))
         }
 
-        UserService.findOne({ email: req.params.email })
+
+
+
+        await UserService.findOne({ email: req.params.email })
             .then((user) => {
-                console.log(user)
-                res.status(hs.OK).send({
-                    code: 200,
-                    msg: "Profil Bilgileri",
-                    user
-                })
+                fetch('https://ipapi.co/json/?key=xD2lboob4xzHBX1Zrh6ocoIkaP9dxbUkVzkuL2N1JYWKUHP17G')
+                    .then(function (response) {
+                        response.json().then(jsonData => {
+                            let userData = Object.assign({}, user, jsonData)
+
+                            res.status(200).send({ userData });
+                        });
+                    })
+                    .catch(function (error) {
+                        return next(new ApiError(error?.message))
+                    });
+
+
+
             })
             .catch(e => {
                 next(new ApiError(e?.message))
             })
+
+
     }
 
 }

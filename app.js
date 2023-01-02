@@ -10,7 +10,7 @@ const event = require("./scripts/events")
 const { connect_rabbitmq } = require("./scripts/utils/rabbimqConnection")
 const ApiError = require("../src/scripts/utils/error");
 const nodemon = require("nodemon")
-const { exec } = require('child_process');
+
 config();
 loaders();
 event();
