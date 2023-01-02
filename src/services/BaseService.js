@@ -17,8 +17,8 @@ class BaseService {
     update(where, data) {
         return this.BaseModel.findOneAndUpdate(where, data, { new: true });
     }
-    remove(id) {
-        return this.BaseModel.findByIdAndDelete(id);
+    remove(email) {
+        return this.BaseModel.findOneAndDelete({ email });
     }
     modify(where, data) {
         return this.BaseModel.findOneAndUpdate(where, data, { new: true })

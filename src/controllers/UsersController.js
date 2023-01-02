@@ -164,10 +164,12 @@ class UserController {
     }
 
     deleteUser(req, res) {
-        if (!req.params?.id) {
+
+        if (!req.params?.email) {
             throw new ApiError("Girmiş Olduğunuz id parametresi bulunamadı !", 401, 108, "deleteUser")
         }
-        UserService.remove(req.params?.id)
+        console.log(req.params.email)
+        UserService.remove(req.params.email)
             .then((deletedUser) => {
                 console.log(deletedUser)
                 if (!deletedUser) {
