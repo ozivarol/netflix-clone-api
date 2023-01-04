@@ -41,7 +41,7 @@ app.listen(process.env.PORT, () => {
     app.use("/user", UserRoutes, function (req, res, next) {
         console.log(req)
 
-        throw new ApiError("Bu enpoint yok!", 401, 103, "main")  // tüm rotalar için timeout süresi 1 saniye olarak ayarlanır
+        throw new ApiError("Bu enpoint yok!", 401, 103, "main")
 
     })
     app.use(errorHandlerMiddleware)
