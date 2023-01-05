@@ -56,6 +56,6 @@ app.listen(process.env.PORT, () => {
 
 app.get('/main', (req, res) => {
     res.json({
-        message: "Hello, welcome to Netflix",
+        message: "Hello, welcome to Netflixv2",
     });
 })
