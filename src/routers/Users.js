@@ -12,7 +12,7 @@ router.post("/reset-password", timeout('4s'), AuthValidation.ResetPassword, User
 router.delete("/delete/:email", timeout('4s'), UserController.deleteUser)
 router.patch("/update/:id", timeout('4s'), authenticate, AuthValidation.UpdateUser, UserController.updatedUser);
 router.get("/profile/:email", UserController.profile)
-
+router.post("/getIp", UserController.getIp)
 
 
 

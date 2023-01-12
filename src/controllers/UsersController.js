@@ -183,7 +183,7 @@ class UserController {
 
     }
     async profile(req, res, next) {
-        console.log(req.params.email)
+
         if (!req.params.email) {
             return next(new ApiError(e?.message))
         }
@@ -211,6 +211,27 @@ class UserController {
             .catch(e => {
                 next(new ApiError(e?.message))
             })
+
+
+    }
+
+    getIp(req, res, next) {
+        console.log(req.body.data)
+        const { ip } = req.body
+        console.log(ip)
+
+
+
+        fetch(`https://ipapi.co/${req.body.data}/json/?key=xD2lboob4xzHBX1Zrh6ocoIkaP9dxbUkVzkuL2N1JYWKUHP17G`)
+            .then(function (response) {
+                response.json().then(jsonData => {
+                    res.status(200).send({ jsonData });
+                });
+            })
+            .catch(function (error) {
+                return next(new ApiError(error?.message))
+            });
+
 
 
     }
